@@ -39,6 +39,11 @@ tbody tr:last-child td{border-bottom:0}
 .code{color:var(--muted);font-size:14px;white-space:nowrap}
 td{color:var(--ink)}
 .star{color:var(--star);font-weight:700}
+caption a{color:inherit;text-decoration:none}
+caption a:hover,caption a:focus-visible{text-decoration:underline;text-underline-offset:3px}
+caption a::after{content:" \203A";opacity:.75}
+a.prog{color:var(--ink);text-decoration:none}
+a.prog:hover,a.prog:focus-visible{color:var(--accent);text-decoration:underline;text-underline-offset:2px}
 .empty{padding:28px;text-align:center;color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:8px}
 .notes{font-size:14px;color:var(--muted);display:flex;flex-direction:column;gap:4px}
 .notes p{margin:0}
@@ -60,6 +65,7 @@ td{color:var(--ink)}
   .box{overflow:visible;border:1px solid var(--line)}
   table{min-width:0;width:100%}
   caption{font-size:14px;padding:6px 10px}
+  caption a::after{content:none}
   th,td{padding:4px 8px}
   th{font-size:10px}
   tr,caption{break-inside:avoid;page-break-inside:avoid}
@@ -210,6 +216,18 @@ const GROUPS = [
   ['Tarım Bilimleri ve Teknolojileri Fakültesi', ['TARIM EKONOMİSİ','TARIM MAKİNELERİ VE TEKNOLOJİLERİ MÜHENDİSLİĞİ','TOPRAK BİLİMİ VE BİTKİ BESLEME']],
   ['Uygulamalı Bilimler Yüksekokulu', ['GASTRONOMİ VE MUTFAK SANATLARI','TURİZM REHBERLİĞİ','YÖNETİM BİLİŞİM SİSTEMLERİ']],
 ];
+// aday.yasar.edu.tr sayfa adresleri
+const SITE = 'https://aday.yasar.edu.tr/';
+const slug = s => s.toLocaleLowerCase('tr-TR').replace(/[çğıöşü]/g, c => ({'ç':'c','ğ':'g','ı':'i','ö':'o','ş':'s','ü':'u'}[c]))
+  .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+const URL_OVERRIDE = {
+  'ELEKTRİK-ELEKTRONİK MÜHENDİSLİĞİ': 'elektrik-elektronik-muhendisligi',
+  'TARIM MAKİNELERİ VE TEKNOLOJİLERİ MÜHENDİSLİĞİ': 'tarim-makineleri-ve-teknolojileri-muhendisligi',
+  'BİLGİSAYAR PROGRAMCILIĞI': 'bilgisayar-programciligi',
+  'GRAFİK TASARIMI': 'grafik-tasarim-programi',
+};
+const progUrl = r => SITE + (URL_OVERRIDE[r.prog] || slug(r.prog) + (r.tur === 'TYT' ? '-programi' : '-bolumu')) + '/';
+const groupUrl = g => g === 'Diğer' ? null : SITE + slug(g) + '/';
 const BURS_ORDER = ['BURSLU','%50 İNDİRİMLİ','%25 İNDİRİMLİ','ÜCRETLİ'];
 const BURS_LABEL = {'BURSLU':'Burslu','%50 İNDİRİMLİ':'%50 İndirimli','%25 İNDİRİMLİ':'%25 İndirimli','ÜCRETLİ':'Ücretli'};
 const SMALL = new Set(['ve']);
@@ -260,11 +278,11 @@ function render() {
       a.prog.localeCompare(b.prog, 'tr') || BURS_ORDER.indexOf(a.burs) - BURS_ORDER.indexOf(b.burs));
     if (!list.length) return '';
     return `<div class="box"><table>
-      <caption>${esc(g)}</caption>
+      <caption>${groupUrl(g) ? `<a href="${groupUrl(g)}" target="_top">${esc(g)}</a>` : esc(g)}</caption>
       <thead><tr><th>Program Kodu</th><th>Program Adı</th><th class="c">Puan Türü</th><th class="r">Kontenjan</th><th class="r">Taban Puanı</th><th class="r">Başarı Sırası</th></tr></thead>
       <tbody>${list.map(r => `<tr>
         <td class="code">${r.kod || '—'}</td>
-        <td>${esc(r.name)}</td>
+        <td><a class="prog" href="${progUrl(r)}" target="_top">${esc(r.name)}</a></td>
         <td class="c">${TUR_LABEL[r.tur] || r.tur}</td>
         <td class="r">${r.kont}</td>
         <td class="r">${r.tur === 'ÖZEL YETENEK' ? DASH : fmtP(r.min)}</td>
