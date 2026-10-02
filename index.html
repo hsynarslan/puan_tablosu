@@ -46,14 +46,9 @@ tbody tr:last-child td{border-bottom:0}
 .empty{padding:28px;text-align:center;color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:8px}
 .notes{font-size:14px;color:var(--muted);display:flex;flex-direction:column;gap:4px}
 .notes p{margin:0}
-.filters{display:flex;flex-wrap:wrap;gap:12px 16px;align-items:flex-end;width:100%}
-.fld{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted)}
-.fld select,.fld input{font:inherit;font-size:14px;padding:7px 10px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink)}
-.fld .rng{display:flex;gap:6px;align-items:center}
-.fld .rng input{width:110px}
-.fld select:focus-visible,.btn-reset:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.btn-reset{font:inherit;font-size:14px;padding:7px 12px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
-@media (max-width:520px){.wrap{padding-inline:16px}input[type=search]{width:100%}.fld,.fld select{width:100%}.fld .rng input{flex:1;width:auto;min-width:0}}
+.fld{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted)}
+.fld input{font:inherit;padding:9px 12px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);width:150px}
+@media (max-width:520px){.wrap{padding-inline:16px}input[type=search]{width:100%}.fld{width:100%}.fld input{flex:1;width:auto;min-width:0}}
 .masthead{background:#ffffff;border:1px solid var(--line);border-radius:8px;padding:20px 16px;display:flex;justify-content:center}
 .masthead img{width:min(360px,100%);height:auto;display:block}
 .btn-print{font:inherit;font-size:14px;padding:8px 14px;border-radius:6px;border:1px solid var(--accent);background:var(--accent);color:var(--surface);cursor:pointer;margin-left:auto}
@@ -84,19 +79,9 @@ tbody tr:last-child td{border-bottom:0}
   <p class="sub">Programların kontenjanları, taban puanları ve başarı sıraları. Programlar fakültelere göre gruplandı.</p>
   <div class="tools">
     <input type="search" id="q" placeholder="Program adı veya kodu ara" aria-label="Program ara">
+    <label class="fld">Başarı sıran<input type="number" id="sira" min="1" placeholder="Örn. 250000" inputmode="numeric"></label>
     <div class="chips" id="f-tur" aria-label="Puan türü"></div>
     <button type="button" class="btn-print" onclick="window.print()">PDF olarak indir</button>
-    <div class="filters">
-      <label class="fld">Fakülte<select id="f-fak"><option value="">Tüm fakülteler</option></select></label>
-      <div class="fld">Taban puanı<div class="rng"><input type="number" id="p-min" placeholder="En az" step="any" min="0" aria-label="En az taban puanı"><span>–</span><input type="number" id="p-max" placeholder="En çok" step="any" min="0" aria-label="En çok taban puanı"></div></div>
-      <div class="fld">Başarı sırası<div class="rng"><input type="number" id="s-min" placeholder="En az" min="0" aria-label="En az başarı sırası"><span>–</span><input type="number" id="s-max" placeholder="En çok" min="0" aria-label="En çok başarı sırası"></div></div>
-      <label class="fld">Sırala<select id="sort">
-        <option value="ad">Ada göre (A–Z)</option>
-        <option value="puan">Taban puanına göre (yüksekten düşüğe)</option>
-        <option value="sira">Başarı sırasına göre (iyiden kötüye)</option>
-      </select></label>
-      <button type="button" class="btn-reset" id="reset">Temizle</button>
-    </div>
   </div>
   <div class="groups" id="groups"></div>
   <div class="notes">
@@ -245,7 +230,7 @@ const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','
 const norm = s => s.toLocaleLowerCase('tr-TR');
 
 DATA.forEach(r => { r.name = name(r); r.group = groupOf(r); });
-const state = { q: '', tur: new Set(), fak: '', pMin: null, pMax: null, sMin: null, sMax: null, sort: 'ad' };
+const state = { q: '', tur: new Set(), sira: null };
 const $ = id => document.getElementById(id);
 
 const TUR_LABEL = {'ÖZEL YETENEK':'Özel Yetenek'};
@@ -257,37 +242,17 @@ const DASH = '<span class="star">**</span>';
   $('f-tur').appendChild(b);
 });
 $('q').addEventListener('input', e => { state.q = e.target.value; render(); });
-ORDER.filter(g => DATA.some(r => r.group === g)).forEach(g => $('f-fak').add(new Option(g, g)));
-$('f-fak').addEventListener('change', e => { state.fak = e.target.value; render(); });
-$('sort').addEventListener('change', e => { state.sort = e.target.value; render(); });
-const numIn = v => v === '' ? null : parseFloat(String(v).replace(',', '.'));
-[['p-min','pMin'],['p-max','pMax'],['s-min','sMin'],['s-max','sMax']].forEach(([id, k]) =>
-  $(id).addEventListener('input', e => { const n = numIn(e.target.value); state[k] = Number.isFinite(n) ? n : null; render(); }));
-$('reset').addEventListener('click', () => {
-  Object.assign(state, { q: '', fak: '', pMin: null, pMax: null, sMin: null, sMax: null, sort: 'ad' });
-  state.tur.clear();
-  ['q','p-min','p-max','s-min','s-max'].forEach(id => $(id).value = '');
-  $('f-fak').value = ''; $('sort').value = 'ad';
-  document.querySelectorAll('#f-tur .chip').forEach(b => b.setAttribute('aria-pressed', 'false'));
-  render();
-});
-// Puanı/sırası olmayan (* ve **) satırlar aralık filtresi açıkken gizlenir, sıralamada sona düşer
-const inRange = (v, lo, hi) => (lo == null && hi == null) || (v != null && (lo == null || v >= lo) && (hi == null || v <= hi));
-const byName = (a, b) => a.prog.localeCompare(b.prog, 'tr') || BURS_ORDER.indexOf(a.burs) - BURS_ORDER.indexOf(b.burs);
-const nullLast = (x, y, f) => x == null ? (y == null ? 0 : 1) : y == null ? -1 : f(x, y);
-const SORTS = {
-  ad: byName,
-  puan: (a, b) => nullLast(a.min, b.min, (x, y) => y - x) || byName(a, b),
-  sira: (a, b) => nullLast(a.sira, b.sira, (x, y) => x - y) || byName(a, b),
-};
+$('sira').addEventListener('input', e => { const n = parseInt(e.target.value, 10); state.sira = n > 0 ? n : null; render(); });
+// Başarı sırası girilince: taban sırası girilen sıranın üstünde kalan (sayıca büyük) ve kontenjanı dolmayan (*) programlar
+const fits = r => state.sira == null || (r.tur !== 'ÖZEL YETENEK' && (r.sira == null || r.sira >= state.sira));
 
 function render() {
   const q = norm(state.q.trim());
   const rows = DATA.filter(r => (!q || norm(r.name).includes(q) || r.kod.includes(q)) && (!state.tur.size || state.tur.has(r.tur))
-    && (!state.fak || r.group === state.fak)
-    && inRange(r.min, state.pMin, state.pMax) && inRange(r.sira, state.sMin, state.sMax));
+    && fits(r));
   const html = ORDER.map(g => {
-    const list = rows.filter(r => r.group === g).sort(SORTS[state.sort]);
+    const list = rows.filter(r => r.group === g).sort((a, b) =>
+      a.prog.localeCompare(b.prog, 'tr') || BURS_ORDER.indexOf(a.burs) - BURS_ORDER.indexOf(b.burs));
     if (!list.length) return '';
     return `<div class="box"><table>
       <caption>${esc(g)}</caption>
