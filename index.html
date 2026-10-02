@@ -278,11 +278,11 @@ function render() {
       a.prog.localeCompare(b.prog, 'tr') || BURS_ORDER.indexOf(a.burs) - BURS_ORDER.indexOf(b.burs));
     if (!list.length) return '';
     return `<div class="box"><table>
-      <caption>${groupUrl(g) ? `<a href="${groupUrl(g)}" target="_top">${esc(g)}</a>` : esc(g)}</caption>
+      <caption>${groupUrl(g) ? `<a href="${groupUrl(g)}" target="_blank" rel="noopener">${esc(g)}</a>` : esc(g)}</caption>
       <thead><tr><th>Program Kodu</th><th>Program Adı</th><th class="c">Puan Türü</th><th class="r">Kontenjan</th><th class="r">Taban Puanı</th><th class="r">Başarı Sırası</th></tr></thead>
       <tbody>${list.map(r => `<tr>
         <td class="code">${r.kod || '—'}</td>
-        <td><a class="prog" href="${progUrl(r)}" target="_top">${esc(r.name)}</a></td>
+        <td><a class="prog" href="${progUrl(r)}" target="_blank" rel="noopener">${esc(r.name)}</a></td>
         <td class="c">${TUR_LABEL[r.tur] || r.tur}</td>
         <td class="r">${r.kont}</td>
         <td class="r">${r.tur === 'ÖZEL YETENEK' ? DASH : fmtP(r.min)}</td>
