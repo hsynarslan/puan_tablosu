@@ -79,7 +79,7 @@ tbody tr:last-child td{border-bottom:0}
   <p class="sub">Programların kontenjanları, taban puanları ve başarı sıraları. Programlar fakültelere göre gruplandı.</p>
   <div class="tools">
     <input type="search" id="q" placeholder="Program adı veya kodu ara" aria-label="Program ara">
-    <label class="fld">Başarı sıran<input type="number" id="sira" min="1" placeholder="Örn. 250000" inputmode="numeric"></label>
+    <label class="fld">Başarı Sırası<input type="text" id="sira" placeholder="Örn. 250.000" inputmode="numeric" autocomplete="off"></label>
     <div class="chips" id="f-tur" aria-label="Puan türü"></div>
     <button type="button" class="btn-print" onclick="window.print()">PDF olarak indir</button>
   </div>
@@ -242,7 +242,16 @@ const DASH = '<span class="star">**</span>';
   $('f-tur').appendChild(b);
 });
 $('q').addEventListener('input', e => { state.q = e.target.value; render(); });
-$('sira').addEventListener('input', e => { const n = parseInt(e.target.value, 10); state.sira = n > 0 ? n : null; render(); });
+$('sira').addEventListener('input', e => {
+  // Yazarken binlik nokta ekle, imleci aynı rakamın yanında tut
+  const el = e.target, pos = el.selectionStart, before = el.value.slice(0, pos).replace(/\D/g, '').length;
+  const digits = el.value.replace(/\D/g, '').replace(/^0+/, '');
+  el.value = digits.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  let i = 0, seen = 0;
+  while (i < el.value.length && seen < before) { if (/\d/.test(el.value[i])) seen++; i++; }
+  el.setSelectionRange(i, i);
+  state.sira = digits ? parseInt(digits, 10) : null; render();
+});
 // Başarı sırası girilince: taban sırası girilen sıranın üstünde kalan (sayıca büyük) ve kontenjanı dolmayan (*) programlar
 const fits = r => state.sira == null || (r.tur !== 'ÖZEL YETENEK' && (r.sira == null || r.sira >= state.sira));
 
