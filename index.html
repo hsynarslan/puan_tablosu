@@ -64,6 +64,7 @@ tbody tr:last-child td{border-bottom:0}
   <div class="groups" id="groups"></div>
   <div class="notes">
     <p><span class="star">*</span> Kontenjanı dolmayan ya da başarı sırası oluşmayan programdır.</p>
+    <p><span class="star">**</span> Bölüme özel yetenek sınavı ile öğrenci alınmaktadır.</p>
   </div>
 </div>
 
@@ -168,7 +169,10 @@ const RAW = `206010284|RADYO, TELEVİZYON VE SİNEMA|İNGİLİZCE|BURSLU|4|SÖZ|
 206090375|HALKLA İLİŞKİLER VE REKLAMCILIK|İNGİLİZCE|%50 İNDİRİMLİ|4|SÖZ|39|0|197,00369|348,41264|0
 206010293|RADYO, TELEVİZYON VE SİNEMA|İNGİLİZCE|%50 İNDİRİMLİ|4|SÖZ|31|0|198,201|344,4379|0
 206010381|MİMARLIK|İNGİLİZCE|%50 İNDİRİMLİ|4|SAY|40|0|323,54277|367,2235|0
-206011122|İNŞAAT MÜHENDİSLİĞİ|İNGİLİZCE|%50 İNDİRİMLİ|4|SAY|25|0|305,53743|356,10472|0`;
+206011122|İNŞAAT MÜHENDİSLİĞİ|İNGİLİZCE|%50 İNDİRİMLİ|4|SAY|25|0|305,53743|356,10472|0
+|MÜZİK|İNGİLİZCE|BURSLU|4|ÖZEL YETENEK|3|0|--|--|0
+|MÜZİK|İNGİLİZCE|%50 İNDİRİMLİ|4|ÖZEL YETENEK|15|0|--|--|0
+|MÜZİK|İNGİLİZCE|ÜCRETLİ|4|ÖZEL YETENEK|3|0|--|--|0`;
 const toNum = s => (s === '--' || s === '') ? null : parseFloat(s.replace(',', '.'));
 const toInt = s => { const n = parseInt(s.replace(/\./g, ''), 10); return n > 0 ? n : null; };
 const DATA = RAW.trim().split('\n').map(line => {
@@ -177,14 +181,15 @@ const DATA = RAW.trim().split('\n').map(line => {
 });
 
 const GROUPS = [
-  ['Mühendislik Fakültesi', ['ELEKTRİK-ELEKTRONİK MÜHENDİSLİĞİ','ENDÜSTRİ MÜHENDİSLİĞİ','YAZILIM MÜHENDİSLİĞİ','BİLGİSAYAR MÜHENDİSLİĞİ','MAKİNE MÜHENDİSLİĞİ','İNŞAAT MÜHENDİSLİĞİ']],
-  ['Mimarlık Fakültesi', ['MİMARLIK','İÇ MİMARLIK VE ÇEVRE TASARIMI','ENDÜSTRİYEL TASARIM','GÖRSEL İLETİŞİM TASARIMI','ÇİZGİ FİLM VE ANİMASYON']],
-  ['İletişim Fakültesi', ['RADYO, TELEVİZYON VE SİNEMA','HALKLA İLİŞKİLER VE REKLAMCILIK','YENİ MEDYA VE İLETİŞİM']],
   ['Hukuk Fakültesi', ['HUKUK']],
-  ['İktisadi ve İdari Bilimler Fakültesi', ['EKONOMİ','İŞLETME','ULUSLARARASI İLİŞKİLER','ULUSLARARASI TİCARET VE FİNANSMAN','LOJİSTİK YÖNETİMİ','YÖNETİM BİLİŞİM SİSTEMLERİ','PSİKOLOJİ']],
-  ['Fen-Edebiyat Fakültesi', ['İNGİLİZ DİLİ VE EDEBİYATI','İNGİLİZCE MÜTERCİM VE TERCÜMANLIK']],
-  ['Turizm Fakültesi', ['GASTRONOMİ VE MUTFAK SANATLARI','TURİZM REHBERLİĞİ']],
-  ['Ziraat Fakültesi', ['TARIM EKONOMİSİ','TARIM MAKİNELERİ VE TEKNOLOJİLERİ MÜHENDİSLİĞİ','TOPRAK BİLİMİ VE BİTKİ BESLEME']],
+  ['İletişim Fakültesi', ['GÖRSEL İLETİŞİM TASARIMI','HALKLA İLİŞKİLER VE REKLAMCILIK','RADYO, TELEVİZYON VE SİNEMA','YENİ MEDYA VE İLETİŞİM']],
+  ['İnsan ve Toplum Bilimleri Fakültesi', ['İNGİLİZ DİLİ VE EDEBİYATI','İNGİLİZCE MÜTERCİM VE TERCÜMANLIK','ULUSLARARASI İLİŞKİLER','PSİKOLOJİ']],
+  ['İşletme Fakültesi', ['EKONOMİ','İŞLETME','LOJİSTİK YÖNETİMİ','ULUSLARARASI TİCARET VE FİNANSMAN']],
+  ['Mimarlık Fakültesi', ['MİMARLIK','İÇ MİMARLIK VE ÇEVRE TASARIMI']],
+  ['Mühendislik Fakültesi', ['BİLGİSAYAR MÜHENDİSLİĞİ','ELEKTRİK-ELEKTRONİK MÜHENDİSLİĞİ','ENDÜSTRİ MÜHENDİSLİĞİ','İNŞAAT MÜHENDİSLİĞİ','MAKİNE MÜHENDİSLİĞİ','YAZILIM MÜHENDİSLİĞİ']],
+  ['Sanat ve Tasarım Fakültesi', ['ÇİZGİ FİLM VE ANİMASYON','ENDÜSTRİYEL TASARIM','MÜZİK']],
+  ['Tarım Bilimleri ve Teknolojileri Fakültesi', ['TARIM EKONOMİSİ','TARIM MAKİNELERİ VE TEKNOLOJİLERİ MÜHENDİSLİĞİ','TOPRAK BİLİMİ VE BİTKİ BESLEME']],
+  ['Uygulamalı Bilimler Yüksekokulu', ['GASTRONOMİ VE MUTFAK SANATLARI','TURİZM REHBERLİĞİ','YÖNETİM BİLİŞİM SİSTEMLERİ']],
 ];
 const BURS_ORDER = ['BURSLU','%50 İNDİRİMLİ','%25 İNDİRİMLİ','ÜCRETLİ'];
 const BURS_LABEL = {'BURSLU':'Burslu','%50 İNDİRİMLİ':'%50 İndirimli','%25 İNDİRİMLİ':'%25 İndirimli','ÜCRETLİ':'Ücretli'};
@@ -205,9 +210,11 @@ DATA.forEach(r => { r.name = name(r); r.group = groupOf(r); });
 const state = { q: '', tur: new Set() };
 const $ = id => document.getElementById(id);
 
-['SAY','EA','SÖZ','DİL','TYT'].forEach(t => {
+const TUR_LABEL = {'ÖZEL YETENEK':'Özel Yetenek'};
+const DASH = '<span class="star">**</span>';
+['SAY','EA','SÖZ','DİL','TYT','ÖZEL YETENEK'].forEach(t => {
   const b = document.createElement('button');
-  b.type = 'button'; b.className = 'chip'; b.textContent = t; b.setAttribute('aria-pressed', 'false');
+  b.type = 'button'; b.className = 'chip'; b.textContent = TUR_LABEL[t] || t; b.setAttribute('aria-pressed', 'false');
   b.addEventListener('click', () => { state.tur.has(t) ? state.tur.delete(t) : state.tur.add(t); b.setAttribute('aria-pressed', state.tur.has(t)); render(); });
   $('f-tur').appendChild(b);
 });
@@ -224,12 +231,12 @@ function render() {
       <caption>${esc(g)}</caption>
       <thead><tr><th>Program Kodu</th><th>Program Adı</th><th class="c">Puan Türü</th><th class="r">Kontenjan</th><th class="r">Taban Puanı</th><th class="r">Başarı Sırası</th></tr></thead>
       <tbody>${list.map(r => `<tr>
-        <td class="code">${r.kod}</td>
+        <td class="code">${r.kod || '—'}</td>
         <td>${esc(r.name)}</td>
-        <td class="c">${r.tur}</td>
+        <td class="c">${TUR_LABEL[r.tur] || r.tur}</td>
         <td class="r">${r.kont}</td>
-        <td class="r">${fmtP(r.min)}</td>
-        <td class="r">${fmtI(r.sira)}</td>
+        <td class="r">${r.tur === 'ÖZEL YETENEK' ? DASH : fmtP(r.min)}</td>
+        <td class="r">${r.tur === 'ÖZEL YETENEK' ? DASH : fmtI(r.sira)}</td>
       </tr>`).join('')}</tbody></table></div>`;
   }).join('');
   $('groups').innerHTML = html || '<div class="empty">Aramanıza uyan program bulunamadı.</div>';
